@@ -133,11 +133,10 @@ public class BattleshipController implements Observer{
     	String [] data_event = event.getSource().toString().split("\\[");
     	data_event = data_event[1].replace("id", "").replace("=", "").split(",");
     	String id_rect = data_event[0];
-        //System.out.println("ID rect: "+id_rect);
-    	//search of rect selected
+      
         
         if(isMyTurn){
-            //System.out.println("Es mi turno");
+           
             for (Rectangle rectangle : listRectangleShoot) {
                 if(id_rect.equals(rectangle.getId().toString()) ) {
                     if(rectangle.getFill()!= Color.RED && rectangle.getFill()!=Color.BLUE ){
@@ -173,7 +172,6 @@ public class BattleshipController implements Observer{
     	//search of rect selected
     	for (Rectangle rectangle : listRectangleBase) {
             if(id_rect.equals(rectangle.getId().toString()) && cont_ships_available > 0) {
-                System.out.println(rectangle.getFill()!= Color.GREEN);
                 if(rectangle.getFill()!= Color.GREEN){
                     rectangle.setFill(Color.GREEN);
                     cont_ships_available --;
@@ -226,7 +224,7 @@ public class BattleshipController implements Observer{
             public void run() {
                 
                 String data [] = String.valueOf(arg).split(":");
-                System.out.println("arg = "+arg);
+                //System.out.println("arg = "+arg);
                 
                 
                 if(data.length <= 1){
@@ -261,7 +259,7 @@ public class BattleshipController implements Observer{
                              
                            if(id_ship_attacked.equals(rectangle.getId().toString())) {
                                if(board.markMyBoard(id_ship_attacked)){
-                                   System.out.println("Controller msg --> destruyo mi barco");
+                                   //System.out.println("Controller msg --> destruyo mi barco");
                                    rectangle.setFill(Color.RED);
                                    socketClient.sendMessageToEnemy("destruiste mi barco:"+id_ship_attacked);
                                }else{
@@ -273,7 +271,7 @@ public class BattleshipController implements Observer{
                            }
                        }
                     }else if(data[0].equals("destruiste un barco enemigo")){// when u attack and destroy a enemy ship
-                        String id_ship_attacked = data[1];
+                        
                         for (Rectangle rectangle : listRectangleShoot) {
                            if(id_last_ship_attacked.equals(rectangle.getId().toString())) {
                                rectangle.setFill(Color.RED);
