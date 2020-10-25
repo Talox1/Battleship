@@ -1,53 +1,92 @@
 package battleship.model.socket.client;
-
 import java.net.*;
 import java.util.concurrent.Semaphore;
 import java.io.*;
+import java.util.Observable;
+import java.util.Observer;
 
 
-public class ChatClient {
-	private String hostname;
-	private int port;
-	private String userName;
+public class ChatClient extends Observable implements Observer{
+    private String hostname;
+    private int port;
+    private String userName;
+    ReadThread readThread;
+    WriteThread writeThread;
+    Thread hiloReadThread;
+    Thread hiloWriteThread;
+    
+    
+    public ChatClient(String hostname, int port) {
+        this.hostname = hostname;
+        this.port = port;
+    }
 
-	public ChatClient(String hostname, int port) {
-		this.hostname = hostname;
-		this.port = port;
-	}
+    public void execute() {
+        try {
+            Semaphore mutex = new Semaphore(0);
+            Semaphore turno;
+            Socket socket = new Socket(hostname, port);
+           
+            
+            System.out.println("Connected to the chat server");
+           
+            readThread = new ReadThread(socket, mutex);//instance creation
+            readThread.addObserver(this);//setting observer
+            hiloReadThread = new Thread(readThread);//preparing thread
+            hiloReadThread.start();//starting thread
+            //System.out.println("Corriendo hiloread");
+            //readThread.start();//thread
+            
+            
+            
+            try { mutex.acquire(); } catch (Exception e) { }
+            
+            String playerName = readThread.getPlayerName();//getting name player
+            turno = readThread.getSemaphoreTurn();
+            
+            writeThread = new WriteThread(socket, this, playerName);//instance creation
+            writeThread.addObserver(this);//setting observer
+            writeThread.setSemaphoreTurn(turno);
+            
+            hiloWriteThread = new Thread(writeThread);//preparing thread
+            hiloWriteThread.start();//starting thread
+            //writeThread.start();//thread
 
-	public void execute() {
-		try {
-			Semaphore mutex = new Semaphore(0);
-			Semaphore turno;
-			Socket socket = new Socket(hostname, port);
-			
-			System.out.println("Connected to the chat server");
-			ReadThread readThread;
-			WriteThread writeThread;
-			readThread = new ReadThread(socket, mutex);
+        } catch (UnknownHostException ex) {
+            System.out.println("Server not found: " + ex.getMessage());
+        } catch (IOException ex) {
+            System.out.println("I/O Error: " + ex.getMessage());
+            this.setChanged();
+            this.notifyObservers("No se establecion conexion con el servidor");
+        }
+        
+        
 
-			readThread.start();//thread
-			try { mutex.acquire(); } catch (Exception e) { }
-			String playerName = readThread.getPlayerName();
-			//System.out.println("PLAYER NAME:"+playerName);
-			turno = readThread.getSemaphoreTurn();
-			writeThread = new WriteThread(socket, this, playerName);
-			writeThread.setSemaphoreTurn(turno);
-			writeThread.start();//thread
+    }
 
-		} catch (UnknownHostException ex) {
-			System.out.println("Server not found: " + ex.getMessage());
-		} catch (IOException ex) {
-			System.out.println("I/O Error: " + ex.getMessage());
-		}
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
-	}
+    public String getUserName() {
+        return this.userName;
+    }
+    
+    public void sendCoordAtack(String coord){
+        writeThread.sendCoordAtack(coord);
+    }
+    
+    public void sendMessageToEnemy(String msg){
+        writeThread.sendMessageToEnemy(msg);
+    }
+    
+    public void closeConecction(){
+        //writeThread.closeConecction();
+    }
 
-	void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	String getUserName() {
-		return this.userName;
-	}
+    public void update (Observable o, Object arg){
+    	   //System.out.println(String.valueOf(arg));
+           this.setChanged();
+           this.notifyObservers(String.valueOf(arg));
+    }
 }

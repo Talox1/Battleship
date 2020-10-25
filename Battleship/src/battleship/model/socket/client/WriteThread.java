@@ -1,57 +1,72 @@
 package battleship.model.socket.client;
 
+
 import java.io.*;
 import java.net.*;
+import java.util.Observable;
 import java.util.Scanner;
 import java.util.concurrent.Semaphore;
 
-public class WriteThread extends Thread {
-	private PrintWriter writer;
-	private Socket socket;
-	private ChatClient client;
-	private Semaphore turno;
-	private String playerName;
-	public WriteThread(Socket socket, ChatClient client, String playername) {
-		this.socket = socket;
-		this.client = client;
-		this.playerName = playername;
-		try {
-			OutputStream output = socket.getOutputStream();
-			writer = new PrintWriter(output, true);
-		} catch (IOException ex) {
-			System.out.println("Error getting output stream: " + ex.getMessage());
-			ex.printStackTrace();
-		}
-	}
+public class WriteThread extends Observable implements Runnable{
+    private PrintWriter writer;
+    private Socket socket;
+    private ChatClient client;
+    private Semaphore turno;
+    private Semaphore auxTurno = new Semaphore(0);
+    private String playerName;
+    private boolean isGameEnded = false;
+    public WriteThread(Socket socket, ChatClient client, String playername) {
+        this.socket = socket;
+        this.client = client;
+        this.playerName = playername;
+        try {
+            OutputStream output = socket.getOutputStream();
+            writer = new PrintWriter(output, true);
+        } catch (IOException ex) {
+            System.out.println("Error getting output stream: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
 
-	public void run() {
+    public void run() {
+        Console console = System.console();
+        Scanner sc = new Scanner(System.in);
+        String userName = playerName;
+        client.setUserName(userName);
+        writer.println(userName);
 
-		Console console = System.console();
-		Scanner sc = new Scanner(System.in);
-		String userName = playerName;
-		client.setUserName(userName);
-		writer.println(userName);
+        String text;
 
-		String text;
+        do {
+            try { 
+                turno.acquire(); 
+                System.out.println("\n-->[" + userName + "]: can write ");
+                auxTurno.acquire();
+            } catch (Exception e) { 
+                
+            }
+        } while (!isGameEnded);
+        try {
+            socket.close();
+        } catch (IOException ex) {
+            System.out.println("Error writing to server: " + ex.getMessage());
+        }
+    }
 
-		do {
-			try { turno.acquire(); } catch (Exception e) { }
-			System.out.print("\n[" + userName + "]:== ");
-			text = sc.next();//write what you want
-			//writer.println(text);
-			System.out.println(text);
-
-		} while (!text.equals("bye"));
-
-		try {
-			socket.close();
-		} catch (IOException ex) {
-
-			System.out.println("Error writing to server: " + ex.getMessage());
-		}
-	}
-
-	public void setSemaphoreTurn(Semaphore turno){
-		this.turno = turno;
-	}
+    public void setSemaphoreTurn(Semaphore turno){
+        this.turno = turno;
+    }
+  
+    
+    public void sendCoordAtack(String coord){
+        writer.println(coord);
+        
+        try { auxTurno.release(); } catch (Exception e) {}
+        this.setChanged();
+        this.notifyObservers("ya no es tu turno "+playerName);
+    }
+    
+    public void sendMessageToEnemy(String msg){
+        writer.println(msg);
+    }
 }
