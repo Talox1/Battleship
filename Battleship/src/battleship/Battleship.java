@@ -20,6 +20,7 @@ public class Battleship extends Application{
     @Override
     public void start(Stage primary) throws Exception {
             // TODO Auto-generated method stub
+        //FXMLLoader loader = new FXMLLoader(Battleship.class.getResource("view/Imagen.fxml"));
         FXMLLoader loader = new FXMLLoader(Battleship.class.getResource("view/BattleshipView.fxml"));
         AnchorPane root = (AnchorPane) loader.load();
         Scene scene = new Scene(root);

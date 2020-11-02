@@ -23,6 +23,11 @@ import javafx.scene.image.ImageView;
 
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;	
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 
 import javafx.scene.shape.Rectangle;
@@ -32,7 +37,7 @@ public class BattleshipController implements Observer{
     private ArrayList<Rectangle> listRectangleBase = new ArrayList<>();
     private int cont_ships_available = 4;
     private int cont_ships_destroyed = 0;
-    private String id_last_ship_attacked = "";
+    
     boolean isMyTurn = false;
     private Board board = new Board();
     private ChatClient socketClient;
@@ -52,144 +57,116 @@ public class BattleshipController implements Observer{
     @FXML
     private TableColumn<?, ?> tblUser2;
 
+   
     @FXML
-    private Rectangle rect_shoot_0_0, rect_shoot_0_1, rect_shoot_0_2, rect_shoot_0_3, rect_shoot_0_4, rect_shoot_1_0, rect_shoot_1_1, rect_shoot_1_2, rect_shoot_1_3, 
-    	rect_shoot_1_4,  rect_shoot_2_0, rect_shoot_2_1, rect_shoot_2_2,  rect_shoot_2_3, rect_shoot_2_4, rect_shoot_3_0, rect_shoot_3_1, rect_shoot_3_2,rect_shoot_3_3,
-    	rect_shoot_3_4, rect_shoot_4_0, rect_shoot_4_1, rect_shoot_4_2, rect_shoot_4_3, rect_shoot_4_4;
+    private GridPane my_board;
 
     @FXML
-    private Rectangle rect_base_0_0, rect_base_0_1, rect_base_0_2, rect_base_0_3, rect_base_0_4, rect_base_1_0, rect_base_1_1, rect_base_1_2, rect_base_1_3, rect_base_1_4, 
-    	rect_base_2_0, rect_base_2_1, rect_base_2_2, rect_base_2_3, rect_base_2_4, rect_base_3_0, rect_base_3_1, rect_base_3_2, rect_base_3_3, rect_base_3_4, 
-    	rect_base_4_0, rect_base_4_1, rect_base_4_2, rect_base_4_3, rect_base_4_4;
-
+    private GridPane enemy_board;
     
-    @FXML
+    
     void initialize() {
-    	listRectangleShoot.add(rect_shoot_0_0);
-    	listRectangleShoot.add(rect_shoot_0_1);
-    	listRectangleShoot.add(rect_shoot_0_2);
-    	listRectangleShoot.add(rect_shoot_0_3);
-    	listRectangleShoot.add(rect_shoot_0_4);
-    	listRectangleShoot.add(rect_shoot_1_0);
-    	listRectangleShoot.add(rect_shoot_1_1);
-    	listRectangleShoot.add(rect_shoot_1_2);
-    	listRectangleShoot.add(rect_shoot_1_3);
-    	listRectangleShoot.add(rect_shoot_1_4);
-    	listRectangleShoot.add(rect_shoot_2_0);
-    	listRectangleShoot.add(rect_shoot_2_1);
-    	listRectangleShoot.add(rect_shoot_2_2);
-    	listRectangleShoot.add(rect_shoot_2_3);
-    	listRectangleShoot.add(rect_shoot_2_4);
-    	listRectangleShoot.add(rect_shoot_3_0);
-    	listRectangleShoot.add(rect_shoot_3_1);
-    	listRectangleShoot.add(rect_shoot_3_2);
-    	listRectangleShoot.add(rect_shoot_3_3);
-    	listRectangleShoot.add(rect_shoot_3_4);
-    	listRectangleShoot.add(rect_shoot_4_0);
-    	listRectangleShoot.add(rect_shoot_4_1);
-    	listRectangleShoot.add(rect_shoot_4_2);
-    	listRectangleShoot.add(rect_shoot_4_3);
-    	listRectangleShoot.add(rect_shoot_4_4);
-
-    	listRectangleBase.add(rect_base_0_0);
-    	listRectangleBase.add(rect_base_0_1);
-    	listRectangleBase.add(rect_base_0_2);
-    	listRectangleBase.add(rect_base_0_3);
-    	listRectangleBase.add(rect_base_0_4);
-    	listRectangleBase.add(rect_base_1_0);
-    	listRectangleBase.add(rect_base_1_1);
-    	listRectangleBase.add(rect_base_1_2);
-    	listRectangleBase.add(rect_base_1_3);
-    	listRectangleBase.add(rect_base_1_4);
-    	listRectangleBase.add(rect_base_2_0);
-    	listRectangleBase.add(rect_base_2_1);
-    	listRectangleBase.add(rect_base_2_2);
-    	listRectangleBase.add(rect_base_2_3);
-    	listRectangleBase.add(rect_base_2_4);
-    	listRectangleBase.add(rect_base_3_0);
-    	listRectangleBase.add(rect_base_3_1);
-    	listRectangleBase.add(rect_base_3_2);
-    	listRectangleBase.add(rect_base_3_3);
-    	listRectangleBase.add(rect_base_3_4);
-    	listRectangleBase.add(rect_base_4_0);
-    	listRectangleBase.add(rect_base_4_1);
-    	listRectangleBase.add(rect_base_4_2);
-    	listRectangleBase.add(rect_base_4_3);
-    	listRectangleBase.add(rect_base_4_4);
-    	
-        
         //ImageView myShip = new ImageView(new Image(this.getClass().getResourceAsStream("ships.png")));
-    	
+    	for (int i = 0 ; i < 5 ; i++) {
+            ColumnConstraints colConstraints = new ColumnConstraints();
+            colConstraints.setHgrow(Priority.SOMETIMES);
+            my_board.getColumnConstraints().add(colConstraints);
+            enemy_board.getColumnConstraints().add(colConstraints);
+        }
+
+        for (int i = 0 ; i < 5 ; i++) {
+            RowConstraints rowConstraints = new RowConstraints();
+            rowConstraints.setVgrow(Priority.SOMETIMES);
+            my_board.getRowConstraints().add(rowConstraints);
+            enemy_board.getRowConstraints().add(rowConstraints);
+        }
     }
     @FXML
     void exitGame(MouseEvent event) {
-    	System.exit(0);
-        socketClient.closeConecction();
+        System.exit(0);
+    	socketClient.closeConnection();
+        
     }
 
     @FXML
-    void pressAtack(MouseEvent event) {
-    	//get rectangle's id to put a image inside it
-    	String [] data_event = event.getSource().toString().split("\\[");
-    	data_event = data_event[1].replace("id", "").replace("=", "").split(",");
-    	String id_rect = data_event[0];
-      
-        
+    void attack(MouseEvent event) {
         if(isMyTurn){
-           
-            for (Rectangle rectangle : listRectangleShoot) {
-                if(id_rect.equals(rectangle.getId().toString()) ) {
-                    if(rectangle.getFill()!= Color.RED && rectangle.getFill()!=Color.BLUE ){
-                        rectangle.setFill(Color.BLUE);
-                        id_last_ship_attacked = id_rect;
-                        String message = "Atacando:" + id_rect;
             
-                        socketClient.sendCoordAtack(message);
-                    }
-                    break; // to broke process
+            for (int i = 0 ; i < 5 ; i++) {
+                for (int j = 0; j < 5; j++) {
+                    sendCoordsAttack(i, j);
                 }
             }
-            
-            
         }else{
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Wait");
             alert.setHeaderText("Aun no es tu turno para disparar");
             alert.setContentText("Espera tu turno");
-
             alert.showAndWait();
         }
     	
     }
+    
+    
 
     @FXML
     void putShips(MouseEvent event) {
     	//get rectangle's id to put a image inside it
-    	String [] data_event = event.getSource().toString().split("\\[");
-    	data_event = data_event[1].replace("id", "").replace("=", "").split(",");
-    	String id_rect = data_event[0];
-    	
-    	//search of rect selected
-    	for (Rectangle rectangle : listRectangleBase) {
-            if(id_rect.equals(rectangle.getId().toString()) && cont_ships_available > 0) {
-                if(rectangle.getFill()!= Color.GREEN){
-                    rectangle.setFill(Color.GREEN);
-                    cont_ships_available --;
-                    board.setPositionShip(id_rect);
-                }
-                break; // to broke process
+        
+        for (int i = 0 ; i < 5 ; i++) {
+            for (int j = 0; j < 5; j++) {
+                addMyImageShips(j, i);
             }
         }
+    }
+    
+    private void addMyImageShips(int colIndex, int rowIndex) {
+
+        Pane pane = new Pane();
+        pane.setOnMouseClicked(e -> {
+             if(cont_ships_available > 0){
+                ImageView iv = new ImageView(getClass().getResource("images/ship.png")
+                        .toExternalForm());
+                iv.setFitWidth(50);
+                iv.setFitHeight(30);
+                
+               // System.out.printf("Mouse clicked cell [%d, %d]%n", colIndex, rowIndex);
+                my_board.add(iv, colIndex, rowIndex);
+                board.setPositionShip(rowIndex, colIndex);
+                cont_ships_available --;
+             }else{
+                 my_board.setDisable(true);
+             }
+            
+        });
+        my_board.add(pane, colIndex, rowIndex);
+    }
+    
+    private void sendCoordsAttack(int colIndex, int rowIndex){
+         
+        Pane pane = new Pane();
+        
+        pane.setOnMouseClicked(e -> {
+            //System.out.printf("Mouse clicked cell [%d, %d]%n", colIndex, rowIndex);
+            if(isMyTurn){
+                String message = "Atacando:("+rowIndex+","+colIndex+")";
+                //System.out.println("message"+message);
+            
+                socketClient.sendCoordAtack(message);
+            }
+            
+        });
+        enemy_board.add(pane, colIndex, rowIndex);
     }
 
     @FXML
     void restartGame(MouseEvent event) {
-
+        
     }
 
     @FXML
     void startGame(MouseEvent event) {
-        socketClient = new ChatClient("192.168.1.74", 8989);
+        socketClient = new ChatClient("192.168.1.66", 8989);
         socketClient.addObserver(this);
         if(cont_ships_available > 0){
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -206,23 +183,18 @@ public class BattleshipController implements Observer{
             });
             
         }else{
-            /*Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Iniciando juego");
-            //alert.setHeaderText("No has puesto todos los barcos");
-            alert.setContentText("Presione ok");
-
-            alert.showAndWait();*/
             socketClient.execute();
             btn_start.setDisable(true);
         }
     	
     }
     
+    
     public void update (Observable o, Object arg){
     	Platform.runLater(new Runnable() {//update an UI component 
             @Override
             public void run() {
-                
+                //System.out.println("Controller msg (arg) 194-->"+String.valueOf(arg));
                 String data [] = String.valueOf(arg).split(":");
                 //System.out.println("arg = "+arg);
                 
@@ -253,32 +225,53 @@ public class BattleshipController implements Observer{
                 }else{
                     if(data[0].equals("el enemigo te ataco")){//when the enemy attacks u
                        //.out.println("Controller msg --> marcar mi tablero");
-                        String id_ship_attacked = data[1].replace("rect_shoot", "rect_base");// change id to find my ships
+                        String[] coord_bomb = data[1].replace("(","").replace(")","").split(",");// save
+                        int coord_x = Integer.parseInt(coord_bomb[1]); 
+                        int coord_y = Integer.parseInt(coord_bomb[0]); 
+                        //System.out.println("controller msg 228--> "+coord_bomb[0]+":"+coord_bomb[1]);
                         
-                         for (Rectangle rectangle : listRectangleBase) {
-                             
-                           if(id_ship_attacked.equals(rectangle.getId().toString())) {
-                               if(board.markMyBoard(id_ship_attacked)){
-                                   //System.out.println("Controller msg --> destruyo mi barco");
-                                   rectangle.setFill(Color.RED);
-                                   socketClient.sendMessageToEnemy("destruiste mi barco:"+id_ship_attacked);
-                               }else{
-                                   socketClient.sendMessageToEnemy("fallaste el tiro:"+id_ship_attacked);
-                                   rectangle.setFill(Color.BLUE);
-                               }
+                            if(board.markMyBoard(coord_x, coord_y )){
+                                ImageView iv = new ImageView(getClass().getResource("images/ship_destroyed.png").toExternalForm());
+                                iv.setFitWidth(50);
+                                iv.setFitHeight(30);
+                                //System.out.println("Controller msg --> destruyo mi barco");
+                                //rectangle.setFill(Color.RED);
+                                
+                                    Pane pane = new Pane();
+                                    my_board.add(iv, coord_x, coord_y);
+                                    my_board.add(pane, coord_x, coord_y);
+
+                                socketClient.sendMessageToEnemy("destruiste mi barco:"+data[1]);
+                            }else{
+                                socketClient.sendMessageToEnemy("fallaste el tiro:"+data[1]);
+                                
+                                ImageView iv = new ImageView(getClass().getResource("images/missile_failed.png").toExternalForm());
+                                iv.setFitWidth(50);
+                                iv.setFitHeight(30);
+                                
+                                Pane pane = new Pane();
+                                my_board.add(iv, coord_x, coord_y);
+                                my_board.add(pane, coord_x, coord_y);
+                                //rectangle.setFill(Color.BLUE);
+                            }
                                    
-                               break; // to broke process
-                           }
-                       }
+                       
                     }else if(data[0].equals("destruiste un barco enemigo")){// when u attack and destroy a enemy ship
+                        String[] coordS = data[1].replace("(", "").replace(")","").split(",");
                         
-                        for (Rectangle rectangle : listRectangleShoot) {
-                           if(id_last_ship_attacked.equals(rectangle.getId().toString())) {
-                               rectangle.setFill(Color.RED);
-                               break; // to broke process
-                           }
-                        }
+                        int coord_x = Integer.parseInt(coordS[1]);
+                        int coord_y = Integer.parseInt(coordS[0]);
+                        //System.out.println("Conttoller mesaje, destruiste un barco enemigo"+data[1]);
                         cont_ships_destroyed ++;
+                        
+                        ImageView iv = new ImageView(getClass().getResource("images/ship_destroyed.png").toExternalForm());
+                        iv.setFitWidth(50);
+                        iv.setFitHeight(30);
+
+                        Pane pane = new Pane();
+                        enemy_board.add(iv, coord_x, coord_y);
+                        enemy_board.add(pane, coord_x, coord_y);
+                                
                         if(cont_ships_destroyed == 4){
                             socketClient.sendMessageToEnemy("Has perdido");//send message to enemy that he lose 
                             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -290,6 +283,18 @@ public class BattleshipController implements Observer{
                         }
                             
                        
+                    }else if(data[0].equals("falle mi tiro")){
+                        String [] coordS = data[1].replace("(", "").replace(")","").split(",");
+                        int coord_x = Integer.parseInt(coordS[1]);
+                        int coord_y = Integer.parseInt(coordS[0]);
+                        
+                        ImageView iv = new ImageView(getClass().getResource("images/missile_failed.png").toExternalForm());
+                        iv.setFitWidth(50);
+                        iv.setFitHeight(30);
+
+                        Pane pane = new Pane();
+                        enemy_board.add(iv, coord_x, coord_y);
+                        enemy_board.add(pane, coord_x, coord_y);
                     }
                 }
             }

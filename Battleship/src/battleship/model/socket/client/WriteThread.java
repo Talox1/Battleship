@@ -40,17 +40,13 @@ public class WriteThread extends Observable implements Runnable{
         do {
             try { 
                 turno.acquire(); 
-                System.out.println("\n-->[" + userName + "]: can write ");
+                System.out.println("\n-->[" + userName + "]: can shoot ");
                 auxTurno.acquire();
             } catch (Exception e) { 
                 
             }
         } while (!isGameEnded);
-        try {
-            socket.close();
-        } catch (IOException ex) {
-            System.out.println("Error writing to server: " + ex.getMessage());
-        }
+        
     }
 
     public void setSemaphoreTurn(Semaphore turno){
@@ -68,5 +64,13 @@ public class WriteThread extends Observable implements Runnable{
     
     public void sendMessageToEnemy(String msg){
         writer.println(msg);
+    }
+    
+    public void closeConnection(){
+        try {
+            socket.close();
+        } catch (IOException ex) {
+            System.out.println("Error writing to server: " + ex.getMessage());
+        }
     }
 }

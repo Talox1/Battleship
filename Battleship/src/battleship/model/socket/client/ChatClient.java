@@ -80,8 +80,8 @@ public class ChatClient extends Observable implements Observer{
         writeThread.sendMessageToEnemy(msg);
     }
     
-    public void closeConecction(){
-        //writeThread.closeConecction();
+    public void closeConnection(){
+        writeThread.closeConnection();
     }
 
     public void update (Observable o, Object arg){
