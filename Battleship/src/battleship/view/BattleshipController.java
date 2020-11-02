@@ -124,7 +124,8 @@ public class BattleshipController implements Observer{
 
         Pane pane = new Pane();
         pane.setOnMouseClicked(e -> {
-             if(cont_ships_available > 0){
+            
+             if(cont_ships_available > 0 && !board.isCoordUsed(rowIndex, colIndex )){
                 ImageView iv = new ImageView(getClass().getResource("images/ship.png")
                         .toExternalForm());
                 iv.setFitWidth(50);
@@ -134,7 +135,8 @@ public class BattleshipController implements Observer{
                 my_board.add(iv, colIndex, rowIndex);
                 board.setPositionShip(rowIndex, colIndex);
                 cont_ships_available --;
-             }else{
+             }else if(cont_ships_available == 0 ){
+                 
                  my_board.setDisable(true);
              }
             
